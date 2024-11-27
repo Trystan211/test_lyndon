@@ -41,10 +41,8 @@ const loader = new GLTFLoader();
 let snowmanMixer = null;
 let snowman = null;
 
-const modelUrl = 'https://trystan211.github.io/test_lyndon/snowman.glb';
-
 loader.load(
-  modelUrl,
+  'https://example.com/snowman.glb', // Update this URL with your snowman model
   (gltf) => {
     snowman = gltf.scene;
     snowman.position.set(0, 0, 0);
@@ -136,8 +134,8 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
-// Snow Particles
-const snowParticles = new THREE.Geometry();
+// Snow Particles using BufferGeometry
+const snowParticles = new THREE.BufferGeometry();
 const snowMaterial = new THREE.PointsMaterial({
   color: 0xffffff,
   size: 0.1,
@@ -145,14 +143,16 @@ const snowMaterial = new THREE.PointsMaterial({
   transparent: true,
 });
 
-for (let i = 0; i < 5000; i++) {
-  const snowflake = new THREE.Vector3(
-    Math.random() * 50 - 25,
-    Math.random() * 30 + 5,
-    Math.random() * 50 - 25
-  );
-  snowParticles.vertices.push(snowflake);
+const snowflakeCount = 5000;
+const positions = new Float32Array(snowflakeCount * 3); // Three components per particle (x, y, z)
+
+for (let i = 0; i < snowflakeCount; i++) {
+  positions[i * 3] = Math.random() * 50 - 25; // x position
+  positions[i * 3 + 1] = Math.random() * 30 + 5; // y position
+  positions[i * 3 + 2] = Math.random() * 50 - 25; // z position
 }
+
+snowParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
 const snow = new THREE.Points(snowParticles, snowMaterial);
 scene.add(snow);
@@ -173,14 +173,17 @@ const animate = () => {
     if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
   });
 
-  // Update snow particles
-  snowParticles.vertices.forEach((snowflake) => {
-    snowflake.y -= 0.05;
-    if (snowflake.y < 0) snowflake.y = 30;
-  });
+  // Update snow particles (falling effect)
+  const positionsArray = snowParticles.attributes.position.array;
+  for (let i = 0; i < positionsArray.length; i += 3) {
+    positionsArray[i + 1] -= 0.05; // Make snowflakes fall
 
-  // Notify the system to update particles
-  snowParticles.verticesNeedUpdate = true;
+    if (positionsArray[i + 1] < 0) {
+      positionsArray[i + 1] = 30; // Reset snowflake to the top
+    }
+  }
+
+  snowParticles.attributes.position.needsUpdate = true;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -194,3 +197,4 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
