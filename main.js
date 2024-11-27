@@ -42,7 +42,7 @@ let snowmanMixer = null;
 let snowman = null;
 
 loader.load(
-  'https://example.com/snowman.glb', // Update this URL with your snowman model
+  'https://trystan211.github.io/test_lyndon/snowman.glb', // Update this URL with your snowman model
   (gltf) => {
     snowman = gltf.scene;
     snowman.position.set(0, 0, 0);
