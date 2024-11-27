@@ -203,6 +203,21 @@ const animate = () => {
 
   snowParticles.attributes.position.needsUpdate = true;
 
+  // Move fireflies
+  for (let i = 0; i < fireflies.length; i++) {
+    const firefly = fireflies[i];
+    const position = firefly.light.position;
+    const velocity = firefly.velocity;
+
+    // Update position
+    position.add(velocity);
+
+    // Bounce back if firefly goes out of bounds
+    if (position.x < -20 || position.x > 20) velocity.x *= -1;
+    if (position.y < 1 || position.y > 6) velocity.y *= -1;
+    if (position.z < -20 || position.z > 20) velocity.z *= -1;
+  }
+
   // Update sa OrbitControls
   controls.update(); // Only required if ang controls.enableDamping = true, or kung ang if controls.auto-rotation kay na enabled
 
