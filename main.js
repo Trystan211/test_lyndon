@@ -2,9 +2,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/loaders/GLTFLoader.js';
 
-// Scene Setup
+// Scene Setup ni don
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000022); // Dark background
+scene.background = new THREE.Color(0x000022); // Para ngit2
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
@@ -14,13 +14,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// OrbitControls for camera movement
+// OrbitControls para sa camera movement
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;  // Smooth damping
-controls.dampingFactor = 0.25;  // Speed of damping
-controls.screenSpacePanning = false;  // Disable panning along the screen
+controls.dampingFactor = 0.25;  // Speed sa damping
+controls.screenSpacePanning = false;  // Disable panning sa screen
 
-// Ground
+// Ground na snow
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
   new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
@@ -29,8 +29,8 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Fog
-scene.fog = new THREE.Fog(0xffffff, 10, 50); // Fog color changed to white
+// Fog ni
+scene.fog = new THREE.Fog(0xffffff, 10, 50); // Tae na white
 
 // Moonlight
 const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); 
@@ -38,7 +38,7 @@ moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
 scene.add(moonLight);
 
-// Ambient light
+// Ambient na light
 const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
 scene.add(ambientLight);
 
@@ -70,7 +70,7 @@ loader.load(
   }
 );
 
-// Trees (White leaves and shorter brown trunks)
+// Trees ni
 const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
 const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
@@ -96,7 +96,7 @@ for (let i = 0; i < 40; i++) {
   scene.add(foliage);
 }
 
-// Mushrooms
+// Mushrooms ni
 const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
 const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
@@ -122,7 +122,7 @@ for (let i = 0; i < 50; i++) {
   scene.add(cap);
 }
 
-// Fireflies
+// Fireflies ni
 const fireflies = [];
 for (let i = 0; i < 15; i++) {
   const firefly = new THREE.PointLight(0xffff00, 2, 7);
@@ -142,7 +142,7 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
-// Snow Particles using BufferGeometry
+// Snow Particles gamit ang BufferGeometry
 const snowParticles = new THREE.BufferGeometry();
 const snowMaterial = new THREE.PointsMaterial({
   color: 0xffffff,
@@ -152,7 +152,7 @@ const snowMaterial = new THREE.PointsMaterial({
 });
 
 const snowflakeCount = 5000;
-const positions = new Float32Array(snowflakeCount * 3); // Three components per particle (x, y, z)
+const positions = new Float32Array(snowflakeCount * 3); 
 
 for (let i = 0; i < snowflakeCount; i++) {
   positions[i * 3] = Math.random() * 50 - 25; // x position
@@ -160,31 +160,31 @@ for (let i = 0; i < snowflakeCount; i++) {
   positions[i * 3 + 2] = Math.random() * 50 - 25; // z position
 }
 
-// Use BufferAttribute to store the positions
+// Use BufferAttribute para ma store ang positions
 snowParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
 const snow = new THREE.Points(snowParticles, snowMaterial);
 scene.add(snow);
 
-// Update snow particles (falling effect)
+// Update ang snow particles para sa falling na effect
 const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update snow particle positions
+  // Update ang positions sa snow particles
   const positionsArray = snowParticles.attributes.position.array;
   for (let i = 0; i < positionsArray.length; i += 3) {
-    positionsArray[i + 1] -= 0.05; // Make snowflakes fall
+    positionsArray[i + 1] -= 0.05; // Nagpatagak sa snowflakes
 
     if (positionsArray[i + 1] < 0) {
-      positionsArray[i + 1] = 30; // Reset snowflake to the top
+      positionsArray[i + 1] = 30; // Nag reset pabalik sa taas
     }
   }
 
   snowParticles.attributes.position.needsUpdate = true;
 
-  // Update OrbitControls
-  controls.update(); // Only required if controls.enableDamping = true, or if controls.auto-rotation is enabled
+  // Update sa OrbitControls
+  controls.update(); // Only required if ang controls.enableDamping = true, or kung ang if controls.auto-rotation kay na enabled
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
