@@ -3,7 +3,7 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/exampl
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000022);
+scene.background = new THREE.Color(0x000010);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
@@ -26,7 +26,7 @@ scene.add(ground);
 scene.fog = new THREE.Fog(0xaaaaaa, 10, 50);
 
 // Ambient light (reduced intensity)
-const ambientLight = new THREE.AmbientLight(0x888888, 0.2);
+const ambientLight = new THREE.AmbientLight(0x888888, 0.1);
 scene.add(ambientLight);
 
 // Define a "safe radius" around the snowman
