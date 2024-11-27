@@ -162,6 +162,7 @@ const snow = new THREE.Points(snowParticles, snowMaterial);
 scene.add(snow);
 
 // Update snow particles (falling effect)
+const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
