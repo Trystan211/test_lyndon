@@ -157,6 +157,12 @@ snowParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 const snow = new THREE.Points(snowParticles, snowMaterial);
 scene.add(snow);
 
+// OrbitControls - Initialize and update controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;  // Smooth movement
+controls.dampingFactor = 0.25; // Damping factor for smoother motion
+controls.screenSpacePanning = false; // Disable panning in the Z direction
+
 // Animation
 const clock = new THREE.Clock();
 const animate = () => {
@@ -185,6 +191,9 @@ const animate = () => {
 
   snowParticles.attributes.position.needsUpdate = true;
 
+  // Update controls (for camera movement)
+  controls.update();
+
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
@@ -197,4 +206,5 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 
