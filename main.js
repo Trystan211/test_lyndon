@@ -70,13 +70,22 @@ loader.load(
   }
 );
 
+// Safe radius around the snowman
+const safeRadius = 5; // Adjust as needed
+const snowmanPosition = new THREE.Vector3(0, 0, 0); // Snowman's position
+
 // Trees ni
 const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
 const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
 for (let i = 0; i < 40; i++) {
-  const x = Math.random() * 40 - 20;
-  const z = Math.random() * 40 - 20;
+  let x, z;
+
+  // Regenerate positions until they are outside the safe radius
+  do {
+    x = Math.random() * 40 - 20;
+    z = Math.random() * 40 - 20;
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
 
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.3, 0.5, 4, 16),
@@ -101,8 +110,13 @@ const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 
 const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
 for (let i = 0; i < 50; i++) {
-  const x = Math.random() * 40 - 20;
-  const z = Math.random() * 40 - 20;
+  let x, z;
+
+  // Regenerate positions until they are outside the safe radius
+  do {
+    x = Math.random() * 40 - 20;
+    z = Math.random() * 40 - 20;
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
 
   const stem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.2, 0.5),
@@ -125,13 +139,19 @@ for (let i = 0; i < 50; i++) {
 // Fireflies ni
 const fireflies = [];
 for (let i = 0; i < 15; i++) {
+  let x, y, z;
+
+  // Regenerate positions until they are outside the safe radius
+  do {
+    x = Math.random() * 40 - 20;
+    y = Math.random() * 5 + 1;
+    z = Math.random() * 40 - 20;
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
+
   const firefly = new THREE.PointLight(0xffff00, 2, 7);
-  firefly.position.set(
-    Math.random() * 40 - 20,
-    Math.random() * 5 + 1,
-    Math.random() * 40 - 20
-  );
+  firefly.position.set(x, y, z);
   scene.add(firefly);
+
   fireflies.push({
     light: firefly,
     velocity: new THREE.Vector3(
