@@ -46,7 +46,7 @@ loader.load(
   (gltf) => {
     snowman = gltf.scene;
     snowman.position.set(0, 0, 0);
-    snowman.scale.set(0.1, 0.1, 0.1);
+    snowman.scale.set(5, 5, 5);
     scene.add(snowman);
 
     // Handle animations if available
