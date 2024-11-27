@@ -41,12 +41,42 @@ const loader = new GLTFLoader();
 let snowmanMixer = null;
 let snowman = null;
 
+// Define the restricted area for the snowman (e.g., no snowman within this area)
+// Define the restricted area for the snowman (scale adjusted for 5x size)
+const snowmanBounds = new THREE.Box3(
+  new THREE.Vector3(-10 * 5, 0, -10 * 5),  // Min (x, y, z), scaled by 5
+  new THREE.Vector3(10 * 5, 6 * 5, 10 * 5)  // Max (x, y, z), scaled by 5
+);
+
+// Helper function to check if the snowman's position is within the restricted area
+const isPositionInSnowmanArea = (x, y, z) => {
+  const position = new THREE.Vector3(x, y, z);
+  return snowmanBounds.containsPoint(position);
+};
+
+// Snowman Model
+const loader = new GLTFLoader();
+let snowmanMixer = null;
+let snowman = null;
+
 loader.load(
   'https://trystan211.github.io/test_lyndon/snowman.glb', // Update this URL with your snowman model
   (gltf) => {
     snowman = gltf.scene;
-    snowman.position.set(0, 0, 0);
-    snowman.scale.set(5, 5, 5); // Scale it 15x bigger
+
+    let xPos = 0;  // Set the desired position for the snowman
+    let yPos = 0;
+    let zPos = 0;
+
+    // Ensure the snowman is placed within the allowed bounds
+    if (isPositionInSnowmanArea(xPos, yPos, zPos)) {
+      snowman.position.set(xPos, yPos, zPos);
+    } else {
+      console.log('Position is outside the allowed snowman area, adjusting...');
+      snowman.position.set(5, 0, 5);  // Adjust position if outside bounds
+    }
+
+    snowman.scale.set(5, 5, 5); // Scale it 5x bigger (making the snowman larger)
     scene.add(snowman);
 
     // Handle animations if available
@@ -206,5 +236,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-
