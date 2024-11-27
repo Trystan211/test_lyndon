@@ -134,6 +134,27 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
+// Snow Particles
+const snowParticles = new THREE.Geometry();
+const snowMaterial = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 0.1,
+  opacity: 0.8,
+  transparent: true,
+});
+
+for (let i = 0; i < 5000; i++) {
+  const snowflake = new THREE.Vector3(
+    Math.random() * 50 - 25,
+    Math.random() * 30 + 5,
+    Math.random() * 50 - 25
+  );
+  snowParticles.vertices.push(snowflake);
+}
+
+const snow = new THREE.Points(snowParticles, snowMaterial);
+scene.add(snow);
+
 // Animation
 const clock = new THREE.Clock();
 const animate = () => {
@@ -149,6 +170,15 @@ const animate = () => {
     if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
     if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
   });
+
+  // Update snow particles
+  snowParticles.vertices.forEach((snowflake) => {
+    snowflake.y -= 0.05;
+    if (snowflake.y < 0) snowflake.y = 30;
+  });
+
+  // Notify the system to update particles
+  snowParticles.verticesNeedUpdate = true;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
