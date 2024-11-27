@@ -36,29 +36,17 @@ scene.add(moonLight);
 const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
 scene.add(ambientLight);
 
-// Snowman Model - Renamed loader to snowmanLoader
-const snowmanLoader = new GLTFLoader();
+// Snowman Model
+const loader = new GLTFLoader();
 let snowmanMixer = null;
 let snowman = null;
 
-snowmanLoader.load(
+loader.load(
   'https://trystan211.github.io/test_lyndon/snowman.glb', // Update this URL with your snowman model
   (gltf) => {
     snowman = gltf.scene;
-
-    let xPos = 0;  // Set the desired position for the snowman
-    let yPos = 0;
-    let zPos = 0;
-
-    // Ensure the snowman is placed within the allowed bounds
-    if (isPositionInSnowmanArea(xPos, yPos, zPos)) {
-      snowman.position.set(xPos, yPos, zPos);
-    } else {
-      console.log('Position is outside the allowed snowman area, adjusting...');
-      snowman.position.set(5, 0, 5);  // Adjust position if outside bounds
-    }
-
-    snowman.scale.set(5, 5, 5); // Scale it 5x bigger (making the snowman larger)
+    snowman.position.set(0, 0, 0);
+    snowman.scale.set(0.1, 0.1, 0.1);
     scene.add(snowman);
 
     // Handle animations if available
@@ -218,4 +206,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
