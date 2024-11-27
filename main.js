@@ -41,8 +41,10 @@ const loader = new GLTFLoader();
 let snowmanMixer = null;
 let snowman = null;
 
+const modelUrl = 'https://trystan211.github.io/test_lyndon/snowman.glb';
+
 loader.load(
-  'https://example.com/snowman.glb', // Update this URL with your snowman model
+  modelUrl,
   (gltf) => {
     snowman = gltf.scene;
     snowman.position.set(0, 0, 0);
