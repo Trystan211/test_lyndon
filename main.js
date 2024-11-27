@@ -14,6 +14,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
+// OrbitControls for camera movement
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;  // Smooth damping
+controls.dampingFactor = 0.25;  // Speed of damping
+controls.screenSpacePanning = false;  // Disable panning along the screen
+
 // Ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
@@ -136,7 +142,6 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
-// Snow Particles
 // Snow Particles using BufferGeometry
 const snowParticles = new THREE.BufferGeometry();
 const snowMaterial = new THREE.PointsMaterial({
@@ -177,6 +182,9 @@ const animate = () => {
   }
 
   snowParticles.attributes.position.needsUpdate = true;
+
+  // Update OrbitControls
+  controls.update(); // Only required if controls.enableDamping = true, or if controls.auto-rotation is enabled
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
