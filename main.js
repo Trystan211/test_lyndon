@@ -26,7 +26,7 @@ scene.add(ground);
 scene.fog = new THREE.Fog(0xaaaaaa, 10, 50);
 
 // Moonlight
-const moonLight = new THREE.DirectionalLight(0xccccff, 0.5); // Slightly bluish light
+const moonLight = new THREE.DirectionalLight(0xccccff, 0.5);
 moonLight.position.set(10, 30, -10);
 moonLight.castShadow = true;
 scene.add(moonLight);
@@ -37,8 +37,8 @@ scene.add(ambientLight);
 
 // Define a restricted area around the snowman where no objects should overlap
 const snowmanBounds = new THREE.Box3(
-  new THREE.Vector3(-2, 0, -2), // Min (x, y, z)
-  new THREE.Vector3(2, 4, 2)    // Max (x, y, z)
+  new THREE.Vector3(-2, 0, -2),
+  new THREE.Vector3(2, 4, 2)
 );
 
 // Helper function to check if a position is within the snowman bounds
@@ -47,14 +47,14 @@ const isPositionInSnowmanArea = (x, y, z) => {
   return snowmanBounds.containsPoint(position);
 };
 
-// Trees (Brown Trunks and Frosted Leaves)
+// Trees (Brown Trunks with Cone Leaves)
 const treeTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Brown
-const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // Frosted white
+const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // Frosted white
 
 for (let i = 0; i < 20; i++) { // Reduced tree count
   const x = Math.random() * 40 - 20;
   const z = Math.random() * 40 - 20;
-  
+
   if (!isPositionInSnowmanArea(x, 3, z)) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
@@ -64,10 +64,10 @@ for (let i = 0; i < 20; i++) { // Reduced tree count
     trunk.castShadow = true;
 
     const foliage = new THREE.Mesh(
-      new THREE.SphereGeometry(2, 16, 16),
-      leafMaterial
+      new THREE.ConeGeometry(2, 4, 16),
+      coneMaterial
     );
-    foliage.position.set(trunk.position.x, trunk.position.y + 4, trunk.position.z);
+    foliage.position.set(trunk.position.x, trunk.position.y + 5, trunk.position.z);
     foliage.castShadow = true;
 
     scene.add(trunk);
@@ -95,6 +95,34 @@ for (let i = 0; i < 15; i++) {
   });
 }
 
+// Mushrooms (Red Caps)
+const mushroomCapMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 }); // Red cap
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White stem
+
+for (let i = 0; i < 50; i++) {
+  const x = Math.random() * 40 - 20;
+  const z = Math.random() * 40 - 20;
+
+  if (!isPositionInSnowmanArea(x, 0.25, z)) {
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.2, 0.5),
+      mushroomStemMaterial
+    );
+    const cap = new THREE.Mesh(
+      new THREE.ConeGeometry(0.4, 0.3, 8),
+      mushroomCapMaterial
+    );
+    stem.position.set(x, 0.25, z);
+    cap.position.set(x, 0.55, z);
+
+    stem.castShadow = true;
+    cap.castShadow = true;
+
+    scene.add(stem);
+    scene.add(cap);
+  }
+}
+
 // Snowman
 const snowman = new THREE.Group();
 
@@ -120,7 +148,6 @@ const head = new THREE.Mesh(
 head.position.y = 4.7;
 
 // Snowman Features (Carrot Nose and Black Eyes)
-// Carrot Nose
 const nose = new THREE.Mesh(
   new THREE.ConeGeometry(0.1, 0.5, 8),
   new THREE.MeshStandardMaterial({ color: 0xff8800 })
@@ -128,7 +155,6 @@ const nose = new THREE.Mesh(
 nose.position.set(0, 4.7, 0.75);
 nose.rotation.x = Math.PI / 2;
 
-// Eyes
 const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
 const eye1 = new THREE.Mesh(
   new THREE.SphereGeometry(0.07, 8, 8),
@@ -142,7 +168,6 @@ const eye2 = new THREE.Mesh(
 );
 eye2.position.set(0.2, 4.9, 0.6);
 
-// Add to Snowman
 snowman.add(base, middle, head, nose, eye1, eye2);
 scene.add(snowman);
 
@@ -156,7 +181,6 @@ const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update fireflies
   fireflies.forEach(({ light, velocity }) => {
     light.position.add(velocity);
     if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
@@ -171,7 +195,6 @@ const animate = () => {
 
 animate();
 
-// Handle window resize
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
