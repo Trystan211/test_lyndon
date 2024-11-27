@@ -116,10 +116,8 @@ for (let i = 0; i < 50; i++) {
   scene.add(cap);
 }
 
-// Fireflies initialization
-const fireflies = []; // Ensure this is declared at the top before the loop
-console.log(fireflies); // Should output: []
-
+// Fireflies
+const fireflies = [];
 for (let i = 0; i < 15; i++) {
   const firefly = new THREE.PointLight(0xffff00, 2, 7);
   firefly.position.set(
@@ -128,11 +126,6 @@ for (let i = 0; i < 15; i++) {
     Math.random() * 40 - 20
   );
   scene.add(firefly);
-
-  // Check the firefly object before pushing it
-  console.log(firefly); // Should log each firefly object
-
-  // Add the firefly object to the fireflies array
   fireflies.push({
     light: firefly,
     velocity: new THREE.Vector3(
@@ -142,11 +135,6 @@ for (let i = 0; i < 15; i++) {
     ),
   });
 }
-
-// After the loop, check the state of the fireflies array
-console.log(fireflies); // Should show an array of 15 objects
-
-
 
 // Snow Particles
 const snowParticles = new THREE.BufferGeometry();
