@@ -192,6 +192,26 @@ arm2.rotation.z = -Math.PI / 4;
 snowman.add(base, middle, head, nose, eye1, eye2, arm1, arm2);
 scene.add(snowman);
 
+// Raycaster and Mouse for Interactions
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+const onClick = (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObject(snowman, true);
+
+  if (intersects.length > 0) {
+    snowman.scale.set(1.2, 1.2, 1.2);
+    setTimeout(() => snowman.scale.set(1, 1, 1), 300);
+  }
+};
+
+window.addEventListener("click", onClick);
+
 // Camera Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
