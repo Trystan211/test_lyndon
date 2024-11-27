@@ -25,14 +25,8 @@ scene.add(ground);
 // Fog
 scene.fog = new THREE.Fog(0xaaaaaa, 10, 50);
 
-// Moonlight
-const moonLight = new THREE.DirectionalLight(0xccccff, 0.5);
-moonLight.position.set(10, 30, -10);
-moonLight.castShadow = true;
-scene.add(moonLight);
-
-// Ambient light
-const ambientLight = new THREE.AmbientLight(0x888888, 0.4);
+// Ambient light (reduced intensity)
+const ambientLight = new THREE.AmbientLight(0x888888, 0.2);
 scene.add(ambientLight);
 
 // Define a "safe radius" around the snowman
