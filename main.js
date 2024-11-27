@@ -47,7 +47,7 @@ const isPositionInSnowmanArea = (x, y, z) => {
   return snowmanBounds.containsPoint(position);
 };
 
-// Trees (Brown Trunks with Cone Leaves)
+// Trees (Brown Trunks with Longer Cone Leaves)
 const treeTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Brown
 const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // Frosted white
 
@@ -57,17 +57,17 @@ for (let i = 0; i < 20; i++) { // Reduced tree count
 
   if (!isPositionInSnowmanArea(x, 3, z)) {
     const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
+      new THREE.CylinderGeometry(0.3, 0.5, 3, 16), // Lower trunk height
       treeTrunkMaterial
     );
-    trunk.position.set(x, 3, z);
+    trunk.position.set(x, 1.5, z); // Adjust trunk position for reduced height
     trunk.castShadow = true;
 
     const foliage = new THREE.Mesh(
-      new THREE.ConeGeometry(2, 4, 16),
+      new THREE.ConeGeometry(2, 6, 16), // Increased cone height
       coneMaterial
     );
-    foliage.position.set(trunk.position.x, trunk.position.y + 5, trunk.position.z);
+    foliage.position.set(trunk.position.x, trunk.position.y + 3.5, trunk.position.z);
     foliage.castShadow = true;
 
     scene.add(trunk);
@@ -168,7 +168,23 @@ const eye2 = new THREE.Mesh(
 );
 eye2.position.set(0.2, 4.9, 0.6);
 
-snowman.add(base, middle, head, nose, eye1, eye2);
+// Snowman Arms (Stick Branches)
+const armMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+const arm1 = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.05, 0.05, 3),
+  armMaterial
+);
+arm1.position.set(-1.2, 3.5, 0);
+arm1.rotation.z = Math.PI / 4;
+
+const arm2 = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.05, 0.05, 3),
+  armMaterial
+);
+arm2.position.set(1.2, 3.5, 0);
+arm2.rotation.z = -Math.PI / 4;
+
+snowman.add(base, middle, head, nose, eye1, eye2, arm1, arm2);
 scene.add(snowman);
 
 // Camera Controls
