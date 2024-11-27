@@ -4,142 +4,152 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/
 
 // Scene Setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000022); // Darker background for the scene
+scene.background = new THREE.Color(0x000022); // Dark background
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 5, 15);
+camera.position.set(10, 10, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Snow particles
-const snowGeometry = new THREE.BufferGeometry();
-const snowCount = 1000;
-const snowPositions = [];
-for (let i = 0; i < snowCount; i++) {
-  snowPositions.push(Math.random() * 60 - 30, Math.random() * 10 + 5, Math.random() * 60 - 30);
-}
-snowGeometry.setAttribute('position', new THREE.Float32BufferAttribute(snowPositions, 3));
-const snowMaterial = new THREE.PointsMaterial({
-  color: 0xffffff,
-  size: 0.3, // Increased snow particle size
-  transparent: true,
-});
-const snow = new THREE.Points(snowGeometry, snowMaterial);
-scene.add(snow);
-
-// Snow movement (falling downwards)
-const snowVelocity = [];
-for (let i = 0; i < snowCount; i++) {
-  snowVelocity.push(0, -Math.random() * 0.05 - 0.1, 0); // Falling downwards
-}
-
-// Handle Snow animation
-function animateSnow() {
-  const positions = snow.geometry.attributes.position.array;
-  for (let i = 0; i < snowCount; i++) {
-    positions[i * 3 + 1] += snowVelocity[i * 3 + 1];
-    if (positions[i * 3 + 1] < 0) positions[i * 3 + 1] = 10; // Reset snowflake position if it falls below ground
-  }
-  snow.geometry.attributes.position.needsUpdate = true;
-}
-
-// Ground (White floor for snow)
+// Ground
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(60, 80), // Slightly wider ground
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
+  new THREE.PlaneGeometry(50, 50),
+  new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Define model URL at the top
-const modelUrl = 'https://trystan211.github.io/ite18_Activity_3/low_poly_fox_by_pixelmannen_animated.glb';
+// Fog
+scene.fog = new THREE.Fog(0xffffff, 10, 50); // Fog color changed to white
 
-// Load the Fox Model
+// Moonlight
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); 
+moonLight.position.set(10, 30, -10);
+moonLight.castShadow = true;
+scene.add(moonLight);
+
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+scene.add(ambientLight);
+
+// Snowman Model
 const loader = new GLTFLoader();
-let foxMixer = null; // Animation mixer for the fox
-let fox = null; // Reference to the fox object
+let snowmanMixer = null;
+let snowman = null;
 
 loader.load(
-  modelUrl,
+  'https://example.com/snowman.glb', // Update this URL with your snowman model
   (gltf) => {
-    fox = gltf.scene;
-    fox.position.set(0, 0, 0); // Initial position
-    fox.scale.set(0.1, 0.1, 0.1); // Significantly smaller fox
-
-    scene.add(fox);
+    snowman = gltf.scene;
+    snowman.position.set(0, 0, 0);
+    snowman.scale.set(0.1, 0.1, 0.1);
+    scene.add(snowman);
 
     // Handle animations if available
     if (gltf.animations && gltf.animations.length > 0) {
-      foxMixer = new THREE.AnimationMixer(fox);
-      const action = foxMixer.clipAction(gltf.animations[0]); // Assuming the first animation is walking
+      snowmanMixer = new THREE.AnimationMixer(snowman);
+      const action = snowmanMixer.clipAction(gltf.animations[0]);
       action.play();
     }
   },
   undefined,
   (error) => {
-    console.error("An error occurred while loading the fox model:", error);
+    console.error('An error occurred while loading the snowman model:', error);
   }
 );
 
-// Fog
-scene.fog = new THREE.Fog(0x000022, 10, 50);
+// Trees (White leaves and shorter brown trunks)
+const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
-// Lights
-const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); // Moonlight
-moonLight.position.set(10, 30, -10);
-moonLight.castShadow = true;
-scene.add(moonLight);
-
-const ambientLight = new THREE.AmbientLight(0x404040, 0.6); // Soft ambient light
-scene.add(ambientLight);
-
-// Trees (White leaves and brown trunks)
-const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown trunk
-const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White leaves
 for (let i = 0; i < 40; i++) {
-  const x = Math.random() * 60 - 30;
-  const z = Math.random() * 60 - 30;
+  const x = Math.random() * 40 - 20;
+  const z = Math.random() * 40 - 20;
 
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
+    new THREE.CylinderGeometry(0.3, 0.5, 4, 16),
     trunkMaterial
   );
-  trunk.position.set(x, 3, z);
+  trunk.position.set(x, 2, z);
   trunk.castShadow = true;
 
   const foliage = new THREE.Mesh(
-    new THREE.ConeGeometry(2, 4, 16), // Cone-shaped tree
+    new THREE.ConeGeometry(2, 6, 16),
     leafMaterial
   );
-  foliage.position.set(x, 6, z);
+  foliage.position.set(x, 5, z);
   foliage.castShadow = true;
 
   scene.add(trunk);
   scene.add(foliage);
 }
 
-// Camera Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.25;
+// Mushrooms
+const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+for (let i = 0; i < 50; i++) {
+  const x = Math.random() * 40 - 20;
+  const z = Math.random() * 40 - 20;
+
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.2, 0.5),
+    mushroomStemMaterial
+  );
+  const cap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.4, 0.3, 8),
+    mushroomCapMaterial
+  );
+  stem.position.set(x, 0.25, z);
+  cap.position.set(x, 0.55, z);
+
+  stem.castShadow = true;
+  cap.castShadow = true;
+
+  scene.add(stem);
+  scene.add(cap);
+}
+
+// Fireflies
+const fireflies = [];
+for (let i = 0; i < 15; i++) {
+  const firefly = new THREE.PointLight(0xffff00, 2, 7);
+  firefly.position.set(
+    Math.random() * 40 - 20,
+    Math.random() * 5 + 1,
+    Math.random() * 40 - 20
+  );
+  scene.add(firefly);
+  fireflies.push({
+    light: firefly,
+    velocity: new THREE.Vector3(
+      (Math.random() - 0.5) * 0.05,
+      (Math.random() - 0.5) * 0.05,
+      (Math.random() - 0.5) * 0.05
+    ),
+  });
+}
 
 // Animation
 const clock = new THREE.Clock();
-
 const animate = () => {
-  const delta = clock.getDelta(); // Time elapsed since the last frame
+  const elapsedTime = clock.getElapsedTime();
 
-  // Update fox animation if the fox is loaded
-  if (foxMixer) {
-    foxMixer.update(delta); // Update fox animation
-  }
+  // Animate snowman
+  if (snowmanMixer) snowmanMixer.update(clock.getDelta());
 
-  animateSnow(); // Animate snowflakes falling
+  // Update fireflies
+  fireflies.forEach(({ light, velocity }) => {
+    light.position.add(velocity);
+    if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
+    if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
+    if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
+  });
 
-  controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
@@ -147,7 +157,7 @@ const animate = () => {
 animate();
 
 // Handle window resize
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
