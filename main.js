@@ -47,18 +47,18 @@ const isPositionInSnowmanArea = (x, y, z) => {
   return snowmanBounds.containsPoint(position);
 };
 
-// Trees (White Trunks and Frosted Leaves)
-const treeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd });
+// Trees (Brown Trunks and Frosted Leaves)
+const treeTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Brown
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // Frosted white
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 20; i++) { // Reduced tree count
   const x = Math.random() * 40 - 20;
   const z = Math.random() * 40 - 20;
   
   if (!isPositionInSnowmanArea(x, 3, z)) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.5, 6, 16),
-      treeMaterial
+      treeTrunkMaterial
     );
     trunk.position.set(x, 3, z);
     trunk.castShadow = true;
@@ -72,34 +72,6 @@ for (let i = 0; i < 50; i++) {
 
     scene.add(trunk);
     scene.add(foliage);
-  }
-}
-
-// Mushrooms
-const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff8888 });
-const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
-for (let i = 0; i < 50; i++) {
-  const x = Math.random() * 40 - 20;
-  const z = Math.random() * 40 - 20;
-
-  if (!isPositionInSnowmanArea(x, 0.25, z)) {
-    const stem = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.1, 0.2, 0.5),
-      mushroomStemMaterial
-    );
-    const cap = new THREE.Mesh(
-      new THREE.ConeGeometry(0.4, 0.3, 8),
-      mushroomCapMaterial
-    );
-    stem.position.set(x, 0.25, z);
-    cap.position.set(x, 0.55, z);
-
-    stem.castShadow = true;
-    cap.castShadow = true;
-
-    scene.add(stem);
-    scene.add(cap);
   }
 }
 
@@ -147,7 +119,8 @@ const head = new THREE.Mesh(
 );
 head.position.y = 4.7;
 
-// Snowman Features (Carrot Nose)
+// Snowman Features (Carrot Nose and Black Eyes)
+// Carrot Nose
 const nose = new THREE.Mesh(
   new THREE.ConeGeometry(0.1, 0.5, 8),
   new THREE.MeshStandardMaterial({ color: 0xff8800 })
@@ -155,8 +128,22 @@ const nose = new THREE.Mesh(
 nose.position.set(0, 4.7, 0.75);
 nose.rotation.x = Math.PI / 2;
 
+// Eyes
+const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+const eye1 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.07, 8, 8),
+  eyeMaterial
+);
+eye1.position.set(-0.2, 4.9, 0.6);
+
+const eye2 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.07, 8, 8),
+  eyeMaterial
+);
+eye2.position.set(0.2, 4.9, 0.6);
+
 // Add to Snowman
-snowman.add(base, middle, head, nose);
+snowman.add(base, middle, head, nose, eye1, eye2);
 scene.add(snowman);
 
 // Camera Controls
@@ -190,4 +177,3 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
