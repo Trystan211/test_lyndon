@@ -1,9 +1,10 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/loaders/GLTFLoader.js';
 
-// Scene, Camera, Renderer
+// Scene Setup ni don
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000010);
+scene.background = new THREE.Color(0x000022); // Para ngit2
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(10, 10, 15);
@@ -13,96 +14,109 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Ground (Snow)
+// OrbitControls para sa camera movement
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;  // Smooth damping
+controls.dampingFactor = 0.25;  // Speed sa damping
+controls.screenSpacePanning = false;  // Disable panning sa screen
+
+// Ground na snow sab // Pasensya kay flat ra
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
+  new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Fog
-scene.fog = new THREE.Fog(0xaaaaaa, 10, 50);
+// Fog ni
+scene.fog = new THREE.Fog(0xffffff, 10, 50); // Tae na white
 
-// Ambient light (reduced intensity)
-const ambientLight = new THREE.AmbientLight(0x888888, 0.1);
+// Moonlight
+const moonLight = new THREE.DirectionalLight(0x6666ff, 0.4); 
+moonLight.position.set(10, 30, -10);
+moonLight.castShadow = true;
+scene.add(moonLight);
+
+// Ambient na light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
 scene.add(ambientLight);
 
-// Define a "safe radius" around the snowman
-const safeRadius = 5;
+// Snowman Model
+const loader = new GLTFLoader();
+let snowmanMixer = null;
+let snowman = null;
 
-// Helper function to check if a position is outside the safe radius
-const isOutsideSafeRadius = (x, z) => {
-  const distance = Math.sqrt(x * x + z * z);
-  return distance > safeRadius;
-};
+const modelUrl = 'https://trystan211.github.io/test_lyndon/snowman.glb';
 
-// Trees (Brown Trunks with Longer Cone Leaves)
-const treeTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Brown
-const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // Frosted white
+loader.load(
+  modelUrl,
+  (gltf) => {
+    snowman = gltf.scene;
+    snowman.position.set(0, 0, 0);
+    snowman.scale.set(5, 5, 5);
+    scene.add(snowman);
 
-for (let i = 0; i < 20; i++) { // Reduced tree count
+    // Mag handle sa animations if available sa model
+    if (gltf.animations && gltf.animations.length > 0) {
+      snowmanMixer = new THREE.AnimationMixer(snowman);
+      const action = snowmanMixer.clipAction(gltf.animations[0]);
+      action.play();
+    }
+  },
+  undefined,
+  (error) => {
+    console.error('An error occurred while loading the snowman model:', error);
+  }
+);
+
+// Safe radius around sa snowman
+const safeRadius = 5; // Adjust as needed ni diri kung arte imong snowman
+const snowmanPosition = new THREE.Vector3(0, 0, 0); // Position sa snowman
+
+// Trees ni
+const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+for (let i = 0; i < 40; i++) {
   let x, z;
+
+  // Regenerate positions hantud naa na sila gawas sa safe radius
   do {
     x = Math.random() * 40 - 20;
     z = Math.random() * 40 - 20;
-  } while (!isOutsideSafeRadius(x, z));
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
 
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.5, 3, 16), // Lower trunk height
-    treeTrunkMaterial
+    new THREE.CylinderGeometry(0.3, 0.5, 4, 16),
+    trunkMaterial
   );
-  trunk.position.set(x, 1.5, z); // Adjust trunk position for reduced height
+  trunk.position.set(x, 2, z);
   trunk.castShadow = true;
 
   const foliage = new THREE.Mesh(
-    new THREE.ConeGeometry(2, 6, 16), // Increased cone height
-    coneMaterial
+    new THREE.ConeGeometry(2, 6, 16),
+    leafMaterial
   );
-  foliage.position.set(trunk.position.x, trunk.position.y + 3.5, trunk.position.z);
+  foliage.position.set(x, 5, z);
   foliage.castShadow = true;
 
   scene.add(trunk);
   scene.add(foliage);
 }
 
-// Fireflies
-const fireflies = [];
-for (let i = 0; i < 15; i++) {
-  let x, z;
-  do {
-    x = Math.random() * 40 - 20;
-    z = Math.random() * 40 - 20;
-  } while (!isOutsideSafeRadius(x, z));
-
-  const firefly = new THREE.PointLight(0xffff00, 2, 7);
-  firefly.position.set(
-    x,
-    Math.random() * 5 + 1, // Random y-position
-    z
-  );
-  scene.add(firefly);
-  fireflies.push({
-    light: firefly,
-    velocity: new THREE.Vector3(
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05,
-      (Math.random() - 0.5) * 0.05
-    ),
-  });
-}
-
-// Mushrooms (Red Caps)
-const mushroomCapMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 }); // Red cap
-const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White stem
+// Mushrooms ni
+const mushroomCapMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff2222 });
+const mushroomStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
 for (let i = 0; i < 50; i++) {
   let x, z;
+
+  // Regenerate positions naa na sila sa gawas sa safe radius
   do {
     x = Math.random() * 40 - 20;
     z = Math.random() * 40 - 20;
-  } while (!isOutsideSafeRadius(x, z));
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
 
   const stem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.2, 0.5),
@@ -122,115 +136,99 @@ for (let i = 0; i < 50; i++) {
   scene.add(cap);
 }
 
-// Snowman
-const snowman = new THREE.Group();
+// Fireflies ni
+const fireflies = [];
+for (let i = 0; i < 15; i++) {
+  let x, y, z;
 
-// Snowman Base
-const base = new THREE.Mesh(
-  new THREE.SphereGeometry(1.5, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
-);
-base.position.y = 1.5;
+  // Regenerate positions hantod naa na sila outside sa safe radius
+  do {
+    x = Math.random() * 40 - 20;
+    y = Math.random() * 5 + 1;
+    z = Math.random() * 40 - 20;
+  } while (snowmanPosition.distanceTo(new THREE.Vector3(x, 0, z)) < safeRadius);
 
-// Snowman Middle
-const middle = new THREE.Mesh(
-  new THREE.SphereGeometry(1, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
-);
-middle.position.y = 3;
+  const firefly = new THREE.PointLight(0xffff00, 2, 7);
+  firefly.position.set(x, y, z);
+  scene.add(firefly);
 
-// Snowman Head
-const head = new THREE.Mesh(
-  new THREE.SphereGeometry(0.7, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
-);
-head.position.y = 4.7;
+  fireflies.push({
+    light: firefly,
+    velocity: new THREE.Vector3(
+      (Math.random() - 0.5) * 0.05,
+      (Math.random() - 0.5) * 0.05,
+      (Math.random() - 0.5) * 0.05
+    ),
+  });
+}
 
-// Snowman Features (Carrot Nose and Black Eyes)
-const nose = new THREE.Mesh(
-  new THREE.ConeGeometry(0.1, 0.5, 8),
-  new THREE.MeshStandardMaterial({ color: 0xff8800 })
-);
-nose.position.set(0, 4.7, 0.75);
-nose.rotation.x = Math.PI / 2;
+// Snow Particles gamit ang BufferGeometry
+const snowParticles = new THREE.BufferGeometry();
+const snowMaterial = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 0.1,
+  opacity: 0.8,
+  transparent: true,
+});
 
-const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
-const eye1 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.07, 8, 8),
-  eyeMaterial
-);
-eye1.position.set(-0.2, 4.9, 0.6);
+const snowflakeCount = 5000;
+const positions = new Float32Array(snowflakeCount * 3); 
 
-const eye2 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.07, 8, 8),
-  eyeMaterial
-);
-eye2.position.set(0.2, 4.9, 0.6);
+for (let i = 0; i < snowflakeCount; i++) {
+  positions[i * 3] = Math.random() * 50 - 25; // x position
+  positions[i * 3 + 1] = Math.random() * 30 + 5; // y position
+  positions[i * 3 + 2] = Math.random() * 50 - 25; // z position
+}
 
-// Snowman Arms (Stick Branches)
-const armMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-const arm1 = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.05, 0.05, 3),
-  armMaterial
-);
-arm1.position.set(-1.2, 3.5, 0);
-arm1.rotation.z = Math.PI / 4;
+// Use BufferAttribute para ma store ang positions
+snowParticles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-const arm2 = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.05, 0.05, 3),
-  armMaterial
-);
-arm2.position.set(1.2, 3.5, 0);
-arm2.rotation.z = -Math.PI / 4;
+const snow = new THREE.Points(snowParticles, snowMaterial);
+scene.add(snow);
 
-snowman.add(base, middle, head, nose, eye1, eye2, arm1, arm2);
-scene.add(snowman);
-
-// Raycaster and Mouse for Interactions
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-const onClick = (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const intersects = raycaster.intersectObject(snowman, true);
-
-  if (intersects.length > 0) {
-    snowman.scale.set(1.2, 1.2, 1.2);
-    setTimeout(() => snowman.scale.set(1, 1, 1), 300);
-  }
-};
-
-window.addEventListener("click", onClick);
-
-// Camera Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.25;
-
-// Animation
+// Update ang snow particles para sa falling na effect
 const clock = new THREE.Clock();
 const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  fireflies.forEach(({ light, velocity }) => {
-    light.position.add(velocity);
-    if (light.position.y < 1 || light.position.y > 6) velocity.y *= -1;
-    if (light.position.x < -20 || light.position.x > 20) velocity.x *= -1;
-    if (light.position.z < -20 || light.position.z > 20) velocity.z *= -1;
-  });
+  // Update ang positions sa snow particles
+  const positionsArray = snowParticles.attributes.position.array;
+  for (let i = 0; i < positionsArray.length; i += 3) {
+    positionsArray[i + 1] -= 0.05; // Nagpatagak sa snowflakes
 
-  controls.update();
+    if (positionsArray[i + 1] < 0) {
+      positionsArray[i + 1] = 30; // Nag reset pabalik sa taas
+    }
+  }
+
+  snowParticles.attributes.position.needsUpdate = true;
+
+  // Paglihok sa fireflies
+  for (let i = 0; i < fireflies.length; i++) {
+    const firefly = fireflies[i];
+    const position = firefly.light.position;
+    const velocity = firefly.velocity;
+
+    // Update ang position
+    position.add(velocity);
+
+    // Bounce back if ang firefly kay gusto mag deado sa kilid
+    if (position.x < -20 || position.x > 20) velocity.x *= -1;
+    if (position.y < 1 || position.y > 6) velocity.y *= -1;
+    if (position.z < -20 || position.z > 20) velocity.z *= -1;
+  }
+
+  // Update sa OrbitControls
+  controls.update(); // Only required if ang controls.enableDamping = true, or kung ang if controls.auto-rotation kay na enabled
+
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
 
 animate();
 
-window.addEventListener("resize", () => {
+// Handle window resize
+window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
